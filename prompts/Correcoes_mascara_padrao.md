@@ -22,7 +22,6 @@ Nenhuma aba, nome definido ou formatação condicional foi removido. A Inputs e 
 | 13 | Model linhas 137, 150, 189 | projeção partia de coluna anual vazia (zero) ou pulava um trimestre; AI189 era 0 digitado | cada trimestre parte do trimestre anterior; a dívida LP do 1Q26 parte do saldo real (linha 183) |
 | 14 | Model linhas 225, 230, 231 | preço médio e ações pulavam o 2º trimestre e partiam de coluna anual vazia | trimestre anterior; o 1Q26 continua partindo de AG225/AG230 |
 | 15 | Model linha 196 | `(X258,X265)` é união de células e dava #VALUE! (154 células) | CFO (259) + CFI (266) + fluxos de capital (268:274) |
-
 | 16 | Model linhas 300, 302 e 303 | alavancagem usava EBITDA do trimestre × 4 | EBITDA dos últimos 12 meses (definição usada pelas companhias) |
 | 17 | Model linhas 311 a 321 | NOPLAT calculado sobre o lucro antes do IR; colunas anuais vazias (Valuation lia capital investido = 0) | EBIT (linha 39) e colunas anuais preenchidas |
 | 18 | Valuation G50:L50 | ROIC digitado como o texto "#VALUE!" | fórmula do ROIC |
