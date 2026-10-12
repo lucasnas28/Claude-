@@ -23,13 +23,13 @@ Nenhuma aba, nome definido ou formatação condicional foi removido. A Inputs e 
 | 14 | Model linhas 225, 230, 231 | preço médio e ações pulavam o 2º trimestre e partiam de coluna anual vazia | trimestre anterior; o 1Q26 continua partindo de AG225/AG230 |
 | 15 | Model linha 196 | `(X258,X265)` é união de células e dava #VALUE! (154 células) | CFO (259) + CFI (266) + fluxos de capital (268:274) |
 
-Teste no modelo da Fleury preenchido: #VALUE! e #REF! zeraram, nenhum erro nas colunas históricas e os checks continuam zerados.
-
 | 16 | Model linhas 300, 302 e 303 | alavancagem usava EBITDA do trimestre × 4 | EBITDA dos últimos 12 meses (definição usada pelas companhias) |
 | 17 | Model linhas 311 a 321 | NOPLAT calculado sobre o lucro antes do IR; colunas anuais vazias (Valuation lia capital investido = 0) | EBIT (linha 39) e colunas anuais preenchidas |
 | 18 | Valuation G50:L50 | ROIC digitado como o texto "#VALUE!" | fórmula do ROIC |
 | 19 | Valuation D8 | `scenario` não existia (#NAME?) | seletor de cenário em E8 (1 Bull, 2 Base, 3 Bear) |
 | 20 | Nomes globais | wacc, risk_free_rate, risk_premium, relevered_beta e totalcap apontavam para #REF! (a Valuation usa as versões locais) | removidos |
+
+Teste no modelo da Fleury preenchido: #VALUE! e #REF! zeraram, nenhum erro nas colunas históricas e os checks continuam zerados.
 
 ## Células de input destacadas em amarelo
 
