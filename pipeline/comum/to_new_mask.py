@@ -225,6 +225,24 @@ for r in range(8, nm.max_row + 1):
         if refs:
             nm[f'{cl}{r}'] = f'=IF(COUNT({",".join("H" + x for x in refs)})=0,"",{f[1:]})'; n_h += 1
 FIX.append(f'Model 1T21/2021: {n_h} variações de saldo sem o saldo de 2020 ficam vazias (antes davam o saldo inteiro)')
+# linha 3 (check de DRE): a máscara só tem a fórmula a partir do 1T26; sem ela o CHECKS do histórico cobria só o balanço.
+# Lucro líquido do Model contra o lucro reportado (linha 4), de 1T21 a 2T26 e nos anuais.
+ni_row = re.search(r'AH(\d+)-AH4', nm['AH3'].value).group(1)
+for c in range(CI('I'), CI('AI') + 1):
+    cl = L(c)
+    nm[f'{cl}3'] = f'=IF(COUNT({cl}{ni_row},{cl}4)<2,"",ABS({cl}{ni_row}-{cl}4))'
+    nm[f'{cl}3']._style = copy.copy(nm['AH3']._style)
+FIX.append(f'Model linha 3 (check de DRE): fórmula estendida para 1T21-4T25 (lucro do Model, linha {ni_row}, contra o reportado, linha 4)')
+# linha 17 ("Check Receita"): vazia na máscara. Liga no check do bloco de drivers; sem check, receita (15) − linha de soma
+blk = [(r, str(nm.cell(r, 3).value or '').lower()) for r in range(18, 18 + N)]
+chk = next((r for r, l in blk if 'check' in l), None)
+tot = next((r for r, l in blk if '(soma)' in l or l.startswith('receita total') or l.startswith('total')), None)
+for c in range(CI('I'), CI('AI') + 1):
+    cl = L(c)
+    if chk: nm[f'{cl}17'] = f'=IF(ISNUMBER({cl}{chk}),{cl}{chk},"")'
+    elif tot: nm[f'{cl}17'] = f'=IF(COUNT({cl}{tot})=0,"",ROUND({cl}15-{cl}{tot},1))'
+FIX.append(f'Model linha 17 (Check Receita): ' + (f'ligada ao check do bloco de drivers (linha {chk})' if chk else
+           f'receita líquida − soma dos drivers (linha {tot})' if tot else 'sem linha de soma no bloco de drivers, fica vazia'))
 nm['H5'] = dt.datetime(2020, 12, 31); nm['H5'].number_format = nm['I5'].number_format
 FIX.append('Model H5: data de 31/12/2020 (base do DSO, DIO e DPO do 1T21)')
 vs = nw['Valuation']
@@ -249,7 +267,7 @@ ctl['B31'] = f'{cur_lbl} mil na Inputs → {cur_lbl} milhões via Inputs (2)'
 for r in (25, 26, 27):
     f = ctl[f'B{r}'].value
     if isinstance(f, str) and f.startswith('=IFERROR(') and f.endswith(',"")'):
-        ctl[f'B{r}'] = f[:-3] + ',0)'
+        ctl[f'B{r}'] = f[:-4] + ',0)'
 FIX.append('Control B25:B27 (DSO, DIO, DPO): sem histórico o padrão é 0 dia em vez de "" (evitava #VALUE! na projeção)')
 nw.calculation.fullCalcOnLoad = True
 nw.save(OUT)
