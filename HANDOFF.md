@@ -36,11 +36,20 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 - **Fonte CVM ou planilha de fundamentos:** Alupar, Auren (base CVM reportada; o pro forma fica como memória), Cury, Direcional, Fleury, Grupo Mateus, Movida, Orizon, Sanepar, SIMPAR, Track & Field, Vamos e Vivara.
 - **Bancos** (base própria de banco): ABC Brasil, Agibank, BMG, BR Partners, BTG Pactual e PicPay.
 
+### Bancos dos EUA
+
+- **Base:** `MODELO_IF_BANCOS_EUA_v1.xlsx`, a adaptação da base brasileira de bancos para US GAAP, CECL e Basileia III dos EUA. O que mudou e como gerar está em `pipeline/bancos_eua/README.md`.
+- **JPMorgan** (`Modelo_JPMorgan_2T26.xlsx`), via SEC XBRL, 1T20 a 2T26:
+  - checks de balanço, DRE e PL zerados;
+  - segmentos CCB, CIB, AWM e Corporate fechando com a receita líquida;
+  - o CIB é calculado por diferença, porque em 2024 a JPM juntou CIB e Commercial Banking e reutilizou a etiqueta antiga;
+  - NII ex-Markets, nonaccrual total, LCR e NSFR estão vazios: dependem do earnings supplement;
+  - o EPS do modelo usa as ações no fim do período, não a média diluída do release.
+
 ### Pendentes
 
 | Companhia | Motivo |
 |---|---|
-| JPMorgan | Banco: precisa da estrutura de modelo bancário |
 | SpaceX | IPO em jun/26, só há um 10-Q |
 | Shell, TotalEnergies, BP, Rio Tinto, Glencore, BHP, Canadian Natural, TSMC, ASML, Spotify | Reportam por 20-F ou 40-F, sem trimestre na SEC. Precisam das planilhas de RI de cada companhia |
 
@@ -54,6 +63,6 @@ A lista completa do pedido está na aba "Planilha2" do arquivo `BALANCOS PARA FA
 
 ## Próximos passos sugeridos
 
-- JPMorgan, com a base de bancos usada para os bancos brasileiros.
+- Outros bancos dos EUA (BAC, C, WFC, GS, MS) na base EUA, copiando o `build_jpm.py`; NII ex-Markets, nonaccrual e LCR a partir do earnings supplement.
 - Estrangeiras a partir das planilhas de RI, uma de cada vez.
 - Atualização para o 3T26 com a habilidade `docs/skills/atualizar-trimestre`.
