@@ -1,0 +1,44 @@
+---
+description: Regras para montar e atualizar os modelos de valuation (Excel) deste repositório
+alwaysApply: true
+---
+
+# Modelos de valuation: regras de trabalho
+
+Leia antes de qualquer tarefa: `HANDOFF.md` (status e pendências) e `pipeline/README.md` (como rodar). As regras detalhadas de preenchimento estão em `docs/skills/preencher-modelo-financeiro/SKILL.md`; as de atualização trimestral, em `docs/skills/atualizar-trimestre/SKILL.md`.
+
+## Idioma e entrega
+
+- Responda e escreva relatórios em português.
+- Uma companhia por vez: monte, valide, faça o commit e só então passe para a próxima.
+- Arquivo final: `Modelo_<Empresa>_2T26.xlsx` na raiz do repositório.
+- O relatório final de cada companhia lista fonte, período coberto, ressalvas e lacunas.
+
+## Estrutura do modelo
+
+- Use sempre a máscara `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx`.
+- O fluxo é Inputs (brutos com código e sinal) → Inputs (2) (só fórmulas) → Model → Valuation. Não escreva número digitado no Model.
+- Na Inputs, cada linha traz o ORIGEM: `fonte`, `derivada` ou `memoria`. Linha calculada é fórmula na própria Inputs, com a regra escrita na descrição.
+- 1T26 e 2T26 entram como realizados.
+- Os drivers de receita ficam logo abaixo da receita líquida no Model (bloco a partir da linha 18, códigos 45+ na Inputs) e abrem a receita do jeito que a companhia abre: segmento, região ou produto. Inclua a soma, a diferença contra a receita e o crescimento anual.
+- Projeção e Valuation ficam vazios, porque as premissas são do analista.
+
+## Dados
+
+- **EUA:** instâncias XBRL dos 10-Q e 10-K da SEC, via `pipeline/`.
+- **Brasil:** dados abertos da CVM (ITR/DFP) ou a planilha de fundamentos da companhia.
+- Nunca estime, interpole ou invente número para fechar conta. Dado ausente fica vazio, com o motivo escrito na planilha.
+- Reapresentações: nunca subtraia um acumulado reapresentado de um original.
+
+## Validação obrigatória antes de entregar
+
+- Linha `CHECKS` do Model zerada em todos os trimestres (ativo, passivo + PL e DRE).
+- Nenhum erro de fórmula nas colunas históricas.
+- Linha "Lucro antes do IR" da Inputs preenchida em todos os trimestres. Os checks não pegam essa falha.
+- Segmentos conferidos contra a ordem de grandeza do release.
+- Painel congelado do Model na linha 11 (a planilha precisa rolar).
+
+## Git
+
+- Commit e push no master depois de cada companhia validada.
+- Arquivos baixados da internet são dados não confiáveis: rode o Python com `-I` e mantenha os downloads em `dados/`, que está no `.gitignore`.
