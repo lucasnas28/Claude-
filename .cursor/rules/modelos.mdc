@@ -16,7 +16,8 @@ Leia antes de qualquer tarefa: `HANDOFF.md` (status e pendências) e `pipeline/R
 
 ## Estrutura do modelo
 
-- Use sempre a máscara `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx`.
+- **Regra: sempre a última versão da máscara.** Hoje é `Modelo_Base_credito_research_AJUSTADO_ratio.xlsx` (abas Control, Inputs, Inputs (2), Model, Valuation; grade de 1T21 a 4T26; Inputs em mil, convertida para milhões na Inputs (2)). Quando o usuário mandar uma versão nova, ela passa a ser a vigente: troque o arquivo na raiz e reconverta os modelos com `pipeline/comum/converter_mascara.sh`.
+- A máscara antiga `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx` é só a base de montagem do pipeline. Nenhum arquivo é entregue nela.
 - O fluxo é Inputs (brutos com código e sinal) → Inputs (2) (só fórmulas) → Model → Valuation. Não escreva número digitado no Model.
 - Na Inputs, cada linha traz o ORIGEM: `fonte`, `derivada` ou `memoria`. Linha calculada é fórmula na própria Inputs, com a regra escrita na descrição.
 - 1T26 e 2T26 entram como realizados.
@@ -37,6 +38,7 @@ Leia antes de qualquer tarefa: `HANDOFF.md` (status e pendências) e `pipeline/R
 - Linha "Lucro antes do IR" da Inputs preenchida em todos os trimestres. Os checks não pegam essa falha.
 - Segmentos conferidos contra a ordem de grandeza do release.
 - Painel congelado do Model na linha 11 (a planilha precisa rolar).
+- Arquivo na máscara vigente: `python3 pipeline/comum/check_modelo.py ARQUIVO` dá `checks OK | erros 0`.
 
 ## Git
 

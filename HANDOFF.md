@@ -4,8 +4,9 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 
 ## O que existe
 
-- **Máscara:** `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx`, com as abas Inputs → Inputs (2) → Model → Valuation. As correções feitas na máscara estão em `prompts/Correcoes_mascara_padrao.md`.
-- **Modelos prontos:** `Modelo_<Empresa>_2T26.xlsx` na raiz, com histórico de 1T20 a 2T26 e 1T26 e 2T26 marcados como realizados.
+- **Máscara vigente (regra: sempre a última versão):** `Modelo_Base_credito_research_AJUSTADO_ratio.xlsx`, com as abas Control → Inputs → Inputs (2) → Model → Valuation e grade de 1T21 a 4T26. Todos os modelos não bancários estão nela. As correções que o conversor aplica sobre a máscara estão em `pipeline/README.md`.
+- **Máscara de montagem:** `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx`, usada só dentro do pipeline (correções em `prompts/Correcoes_mascara_padrao.md`).
+- **Modelos prontos:** `Modelo_<Empresa>_2T26.xlsx` na raiz, com histórico de 1T21 a 2T26 e 1T26 e 2T26 marcados como realizados. Bancos e Auren seguem nas bases próprias.
 - **Pipeline:** `pipeline/`, com instruções em `pipeline/README.md`.
 - **Metodologia** (página para compartilhar): https://claude.ai/artifact/3NFU22unSonQBUYgKVjsEA
 - **Habilidades** com as regras de preenchimento, atualização e projeção: `docs/skills/`.

@@ -1,6 +1,8 @@
 # Pipeline dos modelos 2T26
 
-Gera os arquivos `Modelo_<Empresa>_2T26.xlsx` a partir da máscara `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx` (raiz do repositório).
+Gera os arquivos `Modelo_<Empresa>_2T26.xlsx` na **máscara vigente**, `Modelo_Base_credito_research_AJUSTADO_ratio.xlsx` (raiz do repositório). Regra: sempre a última versão da máscara que o usuário mandou.
+
+O modelo é montado primeiro na máscara antiga, `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx`, cujo layout o `build_gen` conhece, e convertido no fim pelo `comum/to_new_mask.py`.
 
 ## Requisitos
 
@@ -38,6 +40,29 @@ O script termina mostrando a linha `CHECKS` (ativo, passivo + PL e DRE) e `hist 
 | 5 | `sec/gen_drivers.py in out layout.json 18 N spec.py` | Escreve os drivers: códigos 45+ na Inputs e o bloco no Model |
 | 6 | `comum/recalc.py` + `comum/inject.py` | Recalcula no LibreOffice e injeta os valores em cache no arquivo original, preservando a formatação |
 | 7 | `comum/fix_panes.py` | Garante o painel congelado do Model na linha 11 |
+| 8 | `comum/converter_mascara.sh MASCARA SAIDA arq:US$` | Passa para a máscara vigente (`to_new_mask.py`), recalcula e confere com `check_modelo.py` |
+
+## Máscara vigente e conversão
+
+`comum/to_new_mask.py ANTIGO.xlsx MASCARA.xlsx SAIDA.xlsx MOEDA ULTIMO_TRI` faz a conversão:
+
+- **Inputs:** linha com um código e sinal +1 mantém o código. Linha com sinal −1 ou vários códigos vira uma linha bruta sem código e uma linha de lançamento por código (`=sinal × bruta`). Valores em mil.
+- **Inputs (2):** flag de realizado na linha 3; código 44 = lucro reportado (base do check de DRE); códigos 45+ = drivers.
+- **Model:** bloco de drivers copiado para a linha 18; linha 4 = lucro reportado.
+- **Control:** companhia, ticker, moeda, unidade e último trimestre realizado.
+- 2020 fica de fora: a grade da máscara começa no 1T21. Variações de saldo do 1T21 e de 2021 (capex, capital de giro, DFC indireta) ficam vazias por falta do saldo de 2020.
+
+Correções que o conversor aplica sobre a máscara (registradas no `.log` de cada arquivo):
+
+- dívida LP e capital + APIC de 1T26 e 2T26 sem ligação com a Inputs (2);
+- linha 196 com união de células `(CFO,CFI)`, que dava #VALUE!;
+- 4T25, 1T26, 2T26 e o anual de 2025 sem a fórmula histórica (capex, imobilizado, intangível, DSO/DIO/DPO etc.): repete o padrão do 3T25;
+- linha 150 (intangível do roll-forward) apontava para o goodwill no histórico;
+- linha 189 (dívida LP no cronograma) com zeros digitados nas projeções, o que zerava a dívida projetada;
+- data de 31/12/2020 em H5, base do DSO do 1T21;
+- IFERROR nas linhas 228 a 231 e nas fórmulas de crescimento da Valuation.
+
+Para reconverter tudo quando chegar máscara nova: `bash pipeline/comum/converter_mascara.sh NOVA.xlsx saida/ Modelo_X_2T26.xlsx:US$ Modelo_Y_2T26.xlsx:R$ ...`. Os arquivos de entrada precisam estar na máscara antiga (com fórmulas). Para partir de arquivos já na máscara vigente, o conversor precisa ser adaptado.
 
 ## Nova companhia
 

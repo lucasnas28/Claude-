@@ -9,7 +9,8 @@ set -e
 T=$1; N=$2; NOME=$3
 P="$(cd "$(dirname "$0")" && pwd)"; REPO="$(cd "$P/.." && pwd)"
 export PIPE_SEC="$P/sec"; export PIPE_DATA="$(mkdir -p "${PIPE_DATA:-$REPO/dados}" && cd "${PIPE_DATA:-$REPO/dados}" && pwd)"
-MASK="$REPO/Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx"
+MASK="$REPO/Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx"      # máscara de montagem (layout que o build_gen conhece)
+MASK_NOVA="$REPO/Modelo_Base_credito_research_AJUSTADO_ratio.xlsx"         # máscara vigente: o arquivo entregue sai nela
 CFG="$P/empresas/$T/cfg.py"; SPEC="$P/empresas/$T/spec.py"
 mkdir -p "$PIPE_DATA/$T"; cd "$PIPE_DATA/$T"
 if [ ! -s dl/accns.txt ]; then
@@ -24,5 +25,7 @@ timeout 900 python3 "$P/comum/recalc.py" ${T}_d.xlsx ${T}_d_recalc.xlsx 2>&1 | g
 python3 "$P/comum/inject.py" ${T}_d.xlsx ${T}_d_recalc.xlsx ${T}_final.xlsx | tail -1
 python3 "$P/comum/fix_panes.py" ${T}_final.xlsx
 python3 "$P/sec/show.py" ${T}_final.xlsx 1 | grep -v -i warn
-cp ${T}_final.xlsx "$REPO/Modelo_${NOME}_2T26.xlsx"
+# passa para a máscara vigente (regra: sempre a última versão da máscara)
+bash "$P/comum/converter_mascara.sh" "$MASK_NOVA" nova ${T}_final.xlsx:'US$'
+cp nova/${T}_final.xlsx "$REPO/Modelo_${NOME}_2T26.xlsx"
 echo "gravado: Modelo_${NOME}_2T26.xlsx"
