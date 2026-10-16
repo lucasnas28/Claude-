@@ -6,7 +6,7 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 
 - **Máscara vigente (regra: sempre a última versão):** `Modelo_Base_credito_research_AJUSTADO_ratio.xlsx`, com as abas Control → Inputs → Inputs (2) → Model → Valuation e grade de 1T21 a 4T26. Todos os modelos não bancários estão nela. As correções que o conversor aplica sobre a máscara estão em `pipeline/README.md`.
 - **Máscara de montagem:** `Modelo_2.0_proprio_Padrao_AJUSTADO-2028_corrigido.xlsx`, usada só dentro do pipeline (correções em `prompts/Correcoes_mascara_padrao.md`).
-- **Modelos prontos:** `Modelo_<Empresa>_2T26.xlsx` na raiz, com histórico de 1T21 a 2T26 e 1T26 e 2T26 marcados como realizados. Bancos e Auren seguem nas bases próprias.
+- **Modelos prontos:** `Modelo_<Empresa>_2T26.xlsx` na raiz, com histórico de 1T21 a 2T26 e 1T26 e 2T26 marcados como realizados. A Auren foi montada direto na máscara vigente (a máscara saiu dela). Os bancos seguem na base própria.
 - **Pipeline:** `pipeline/`, com instruções em `pipeline/README.md`.
 - **Metodologia** (página para compartilhar): https://claude.ai/artifact/3NFU22unSonQBUYgKVjsEA
 - **Habilidades** com as regras de preenchimento, atualização e projeção: `docs/skills/`.
@@ -60,6 +60,7 @@ A lista completa do pedido está na aba "Planilha2" do arquivo `BALANCOS PARA FA
 ## Máscara vigente: o que mudou nos números
 
 - A grade começa no 1T21; 2020 saiu. A DFC indireta do 1T21 (e de 2021 no anual) fica vazia por falta do balanço de 2020.
+- Auren: variação do direito de uso estava zerada na DFC (plug de caixa de até R$ 80 mi); restaurada a fórmula da máscara, plug zerado.
 - Vamos: a fonte só tem DRE desde o 1T23, então 2021-22 ficam fora (o balanço desses anos existia no modelo antigo, sem DRE). A DFC começa no 2T23.
 - Dívida LP e caixa disponível do cronograma em 1T26/2T26 usam o saldo real do balanço (o modelo antigo repetia o 4T25).
 - Diferenças receita x soma dos segmentos que vêm da fonte (já existiam): AMD 4T21/4T22, GE Aerospace (cisões), Bunge até US$ 80 mi em 2024-25, MercadoLibre US$ 622 mi no 4T23, Netflix até US$ 46 mi, Oracle/Uber/Eli Lilly até US$ 8 mi (arredondamento).
