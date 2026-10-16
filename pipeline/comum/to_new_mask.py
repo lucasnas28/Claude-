@@ -186,6 +186,12 @@ for rr in BLK:
             b.font, b.fill, b.border = copy.copy(a.font), copy.copy(a.fill), copy.copy(a.border)
             b.alignment, b.protection, b.number_format = copy.copy(a.alignment), copy.copy(a.protection), a.number_format
 
+# bloco: na máscara nova o cabeçalho anual da Inputs (2) é texto ('2021') e o do Model é número (2021): MATCH com &""
+for rr in BLK:
+    for c in range(1, nm.max_column + 1):
+        f = nm.cell(rr, c).value
+        if isinstance(f, str) and "'Inputs (2)'!$D$2:" in f:
+            nm.cell(rr, c).value = re.sub(r'MATCH\(([A-Z]{1,3}\$7),', r'MATCH(\1&"",', f)
 # bloco: valor da Inputs (2) que pode vir "" (trimestre/ano sem dado) usado em conta -> IFERROR na célula inteira
 for rr in BLK:
     for c in range(1, nm.max_column + 1):
@@ -274,6 +280,23 @@ for c in range(CI('I'), CI('AI') + 1):
     elif tot: nm[f'{cl}17'] = f'=IF(COUNT({cl}{tot})=0,"",ROUND({cl}15-{cl}{tot},1))'
 FIX.append(f'Model linha 17 (Check Receita): ' + (f'ligada ao check do bloco de drivers (linha {chk})' if chk else
            f'receita líquida − soma dos drivers (linha {tot})' if tot else 'sem linha de soma no bloco de drivers, fica vazia'))
+off = [c for c in range(CI('I'), CI('AI') + 1) if n2.cell(3, c - 5).value == 0]
+for c in off:
+    for r in range(8, 359 + N):
+        if r in BLK: continue
+        f = nm.cell(r, c).value
+        if isinstance(f, str) and f.startswith('=') and not f.startswith('=IFERROR('): nm.cell(r, c).value = f'=IFERROR({f[1:]},"")'
+offL = {L(c) for c in off}
+n_ref = 0
+for c in range(CI('I'), CI('AI') + 1):         # realizados que comparam com coluna vazia (1º trimestre, YoY): IFERROR
+    if c in off: continue
+    for r in range(8, 359 + N):
+        if r in BLK: continue
+        f = nm.cell(r, c).value
+        if (isinstance(f, str) and f.startswith('=') and not f.startswith('=IFERROR(')
+                and any(x in offL for x in re.findall(r"(?<![A-Z$!'])\$?([A-Z]{1,2})\$?\d+", f))):
+            nm.cell(r, c).value = f'=IFERROR({f[1:]},"")'; n_ref += 1
+if off: FIX.append(f'Model: {len(off)} colunas históricas sem demonstrações na fonte ficam vazias; {n_ref} fórmulas que comparam com elas com IFERROR')
 nm['H5'] = dt.datetime(2020, 12, 31); nm['H5'].number_format = nm['I5'].number_format
 FIX.append('Model H5: data de 31/12/2020 (base do DSO, DIO e DPO do 1T21)')
 vs = nw['Valuation']
