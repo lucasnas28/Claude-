@@ -31,6 +31,12 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 | Oracle | Ano fiscal fecha em maio; o 10-K etiqueta o 4T fiscal com o valor do ano (tratado no `sx.py`). Custo = cloud e software + hardware + serviços. Preferenciais série D no PL |
 | CoreWeave | IPO em mar/25: a série começa no 1T24 e o balanço no 4T24 |
 
+### Feitos (20-F / RI)
+
+| Companhia | Ressalva |
+|---|---|
+| Shell | Quarterly Databook Q2 2026 do RI (USD milhões, trimestre isolado). Série 1T21–2T26; 2020 vazio porque o databook vigente começa em Q1 2021. Sem EBIT divulgado: lucro operacional derivado (receita − compras − produção − vendas/adm − P&D − exploração − D&A). JV e “interest and other income” no não operacional. PL condensado no código 41. Arrendamentos IFRS 16 dentro do imobilizado e da dívida. Drivers: receita de terceiros por segmento; a soma difere da receita do grupo em até US$ 17 mi. Adjusted Earnings é métrica da Shell (CCS, pós-itens identificados), não EBIT IFRS. |
+
 ### Feitos (Brasil)
 
 - **Fonte CVM ou planilha de fundamentos:** Alupar, Auren (base CVM reportada; o pro forma fica como memória), Cury, Direcional, Fleury, Grupo Mateus, Movida, Orizon, Sanepar, SIMPAR, Track & Field, Vamos e Vivara.
@@ -42,7 +48,7 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 |---|---|
 | JPMorgan | Banco: precisa da estrutura de modelo bancário |
 | SpaceX | IPO em jun/26, só há um 10-Q |
-| Shell, TotalEnergies, BP, Rio Tinto, Glencore, BHP, Canadian Natural, TSMC, ASML, Spotify | Reportam por 20-F ou 40-F, sem trimestre na SEC. Precisam das planilhas de RI de cada companhia |
+| TotalEnergies, BP, Rio Tinto, Glencore, BHP, Canadian Natural, TSMC, ASML, Spotify | Reportam por 20-F ou 40-F, sem trimestre na SEC. Precisam das planilhas de RI de cada companhia |
 
 A lista completa do pedido está na aba "Planilha2" do arquivo `BALANCOS PARA FAZER - COMPLETO.xlsx`, que fica com o usuário.
 
@@ -54,6 +60,6 @@ A lista completa do pedido está na aba "Planilha2" do arquivo `BALANCOS PARA FA
 
 ## Próximos passos sugeridos
 
+- Próxima estrangeira (planilha de RI, uma de cada vez): TotalEnergies. Bancos gringos (JPMorgan) depois da lista 20-F/40-F.
 - JPMorgan: a base de bancos do repositório é a máscara COSIF/IF.data dos bancos brasileiros (BTG, ABC, Agibank etc.). Não há planilha de RI da JPM nem máscara bancária em US GAAP. Antes de montar, confirmar se copiamos essa máscara e mapeamos o 10-Q da SEC, ou se entra uma máscara bancária americana.
-- Estrangeiras a partir das planilhas de RI, uma de cada vez.
 - Atualização para o 3T26 com a habilidade `docs/skills/atualizar-trimestre`.
