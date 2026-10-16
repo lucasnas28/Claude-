@@ -48,12 +48,12 @@ A lista completa do pedido está na aba "Planilha2" do arquivo `BALANCOS PARA FA
 
 ## Bugs já corrigidos (não reintroduzir)
 
-1. **Painel congelado do Model na linha ~350:** a planilha não rolava. Causa: o `shift_rows.py` deslocava o `topLeftCell`. Corrigido no script e nos 43 arquivos.
+1. **Painel congelado do Model na linha ~350:** a planilha não rolava. Causa: o `shift_rows.py` deslocava o `topLeftCell`. Os 43 arquivos já entregues foram corrigidos para `ySplit=11` / `topLeftCell=D12`. A máscara ainda herdava `topLeftCell=D336` com `ySplit` já em 11, e o `fix_panes.py` só atuava quando `ySplit > 20` — ao regenerar a Oracle o bug voltava. O script agora corrige também o `topLeftCell`, e a máscara foi alinhada.
 2. **Lucro antes do IR vazio** quando a companhia troca a tag (Costco, Oracle): a lista padrão de `PRETAX` foi ampliada. Sempre confira se a linha "Lucro antes do IR" da Inputs tem os 26 trimestres. Se faltar algum, o resultado cai em "resultado após IR não classificado" e a alíquota de IR sai errada, mesmo com os checks zerados.
 3. **3M com o valor do ano no 10-K** (Oracle): tratado em `Co._pick`.
 
 ## Próximos passos sugeridos
 
-- JPMorgan, com a base de bancos usada para os bancos brasileiros.
+- JPMorgan: a base de bancos do repositório é a máscara COSIF/IF.data dos bancos brasileiros (BTG, ABC, Agibank etc.). Não há planilha de RI da JPM nem máscara bancária em US GAAP. Antes de montar, confirmar se copiamos essa máscara e mapeamos o 10-Q da SEC, ou se entra uma máscara bancária americana.
 - Estrangeiras a partir das planilhas de RI, uma de cada vez.
 - Atualização para o 3T26 com a habilidade `docs/skills/atualizar-trimestre`.

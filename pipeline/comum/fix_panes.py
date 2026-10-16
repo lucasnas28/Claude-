@@ -1,4 +1,9 @@
-"""Corrige o congelamento de painéis da aba Model (ySplit inflado pelo shift_rows) direto no XML, sem tocar no resto do arquivo.
+"""Corrige o congelamento de painéis da aba Model direto no XML, sem tocar no resto do arquivo.
+
+Dois sintomas, os dois impedem a planilha de rolar:
+- ySplit inflado pelo shift_rows (linha ~350)
+- ySplit já em 11, mas topLeftCell ainda em D336 (herdado da máscara)
+
 uso: fix_panes.py ARQ.xlsx [...]"""
 import sys, re, zipfile, shutil, os
 NEW = ('<sheetViews><sheetView showGridLines="0" tabSelected="1" zoomScale="85" zoomScaleNormal="85" workbookViewId="0">'
@@ -15,11 +20,15 @@ def model_path(z):
 for f in sys.argv[1:]:
     with zipfile.ZipFile(f) as z:
         mp = model_path(z); x = z.read(mp).decode('utf-8')
-        m = re.search(r'<pane [^>]*ySplit="(\d+)"', x)
-        if not m or int(m.group(1)) <= 20: print(f, 'ok', m and m.group(1)); continue
+        pane = re.search(r'<pane [^>]*/?>', x)
+        y = re.search(r'ySplit="(\d+)"', pane.group(0) if pane else '')
+        tl = re.search(r'topLeftCell="([^"]+)"', pane.group(0) if pane else '')
+        if pane and y and int(y.group(1)) == 11 and tl and tl.group(1) == 'D12':
+            print(f, 'ok', y.group(1), tl.group(1)); continue
         x2 = re.sub(r'<sheetViews>.*?</sheetViews>', NEW, x, count=1, flags=re.S)
         tmp = f + '.tmp'
         with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as out:
             for it in z.infolist():
                 out.writestr(it, x2.encode('utf-8') if it.filename == mp else z.read(it.filename))
-    shutil.move(tmp, f); print(f, 'corrigido', m.group(1), '-> 11')
+    shutil.move(tmp, f)
+    print(f, 'corrigido', (y.group(1) if y else '?'), (tl.group(1) if tl else '?'), '-> 11 D12')

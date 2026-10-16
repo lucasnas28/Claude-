@@ -37,7 +37,7 @@ O script termina mostrando a linha `CHECKS` (ativo, passivo + PL e DRE) e `hist 
 | 4 | `comum/shift_rows.py in out Model 18 N` | Abre N linhas no Model, abaixo da receita líquida (linha 18), para os drivers |
 | 5 | `sec/gen_drivers.py in out layout.json 18 N spec.py` | Escreve os drivers: códigos 45+ na Inputs e o bloco no Model |
 | 6 | `comum/recalc.py` + `comum/inject.py` | Recalcula no LibreOffice e injeta os valores em cache no arquivo original, preservando a formatação |
-| 7 | `comum/fix_panes.py` | Garante o painel congelado do Model na linha 11 |
+| 7 | `comum/fix_panes.py` | Garante o painel congelado do Model na linha 11 (`ySplit=11` e `topLeftCell=D12`). A máscara ainda pode trazer `topLeftCell=D336`; o script corrige os dois sintomas. |
 
 ## Nova companhia
 
