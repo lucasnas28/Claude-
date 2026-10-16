@@ -31,6 +31,12 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 | Oracle | Ano fiscal fecha em maio; o 10-K etiqueta o 4T fiscal com o valor do ano (tratado no `sx.py`). Custo = cloud e software + hardware + serviços. Preferenciais série D no PL |
 | CoreWeave | IPO em mar/25: a série começa no 1T24 e o balanço no 4T24 |
 
+### Feitos (20-F / RI)
+
+| Companhia | Ressalva |
+|---|---|
+| Shell | Quarterly Databook Q2 2026 do RI (USD milhões, trimestre isolado). Série 1T21–2T26; 2020 vazio porque o databook vigente começa em Q1 2021. Sem EBIT divulgado: lucro operacional derivado (receita − compras − produção − vendas/adm − P&D − exploração − D&A). JV e “interest and other income” no não operacional. PL condensado no código 41. Arrendamentos IFRS 16 dentro do imobilizado e da dívida. Drivers: receita de terceiros por segmento; a soma difere da receita do grupo em até US$ 17 mi. Adjusted Earnings é métrica da Shell (CCS, pós-itens identificados), não EBIT IFRS. |
+
 ### Feitos (Brasil)
 
 - **Fonte CVM ou planilha de fundamentos:** Alupar, Auren (base CVM reportada; o pro forma fica como memória), Cury, Direcional, Fleury, Grupo Mateus, Movida, Orizon, Sanepar, SIMPAR, Track & Field, Vamos e Vivara.
@@ -42,18 +48,18 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 |---|---|
 | JPMorgan | Banco: precisa da estrutura de modelo bancário |
 | SpaceX | IPO em jun/26, só há um 10-Q |
-| Shell, TotalEnergies, BP, Rio Tinto, Glencore, BHP, Canadian Natural, TSMC, ASML, Spotify | Reportam por 20-F ou 40-F, sem trimestre na SEC. Precisam das planilhas de RI de cada companhia |
+| TotalEnergies, BP, Rio Tinto, Glencore, BHP, Canadian Natural, TSMC, ASML, Spotify | Reportam por 20-F ou 40-F, sem trimestre na SEC. Precisam das planilhas de RI de cada companhia |
 
 A lista completa do pedido está na aba "Planilha2" do arquivo `BALANCOS PARA FAZER - COMPLETO.xlsx`, que fica com o usuário.
 
 ## Bugs já corrigidos (não reintroduzir)
 
-1. **Painel congelado do Model na linha ~350:** a planilha não rolava. Causa: o `shift_rows.py` deslocava o `topLeftCell`. Corrigido no script e nos 43 arquivos.
+1. **Painel congelado do Model na linha ~350:** a planilha não rolava. Causa: o `shift_rows.py` deslocava o `topLeftCell`. Os 43 arquivos já entregues foram corrigidos para `ySplit=11` / `topLeftCell=D12`. A máscara ainda herdava `topLeftCell=D336` com `ySplit` já em 11, e o `fix_panes.py` só atuava quando `ySplit > 20` — ao regenerar a Oracle o bug voltava. O script agora corrige também o `topLeftCell`, e a máscara foi alinhada.
 2. **Lucro antes do IR vazio** quando a companhia troca a tag (Costco, Oracle): a lista padrão de `PRETAX` foi ampliada. Sempre confira se a linha "Lucro antes do IR" da Inputs tem os 26 trimestres. Se faltar algum, o resultado cai em "resultado após IR não classificado" e a alíquota de IR sai errada, mesmo com os checks zerados.
 3. **3M com o valor do ano no 10-K** (Oracle): tratado em `Co._pick`.
 
 ## Próximos passos sugeridos
 
-- JPMorgan, com a base de bancos usada para os bancos brasileiros.
-- Estrangeiras a partir das planilhas de RI, uma de cada vez.
+- Próxima estrangeira (planilha de RI, uma de cada vez): TotalEnergies. Bancos gringos (JPMorgan) depois da lista 20-F/40-F.
+- JPMorgan: a base de bancos do repositório é a máscara COSIF/IF.data dos bancos brasileiros (BTG, ABC, Agibank etc.). Não há planilha de RI da JPM nem máscara bancária em US GAAP. Antes de montar, confirmar se copiamos essa máscara e mapeamos o 10-Q da SEC, ou se entra uma máscara bancária americana.
 - Atualização para o 3T26 com a habilidade `docs/skills/atualizar-trimestre`.
