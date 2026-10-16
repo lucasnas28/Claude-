@@ -25,8 +25,14 @@ LAST = dt.date.fromisoformat(LAST)
 HERE = os.path.dirname(os.path.abspath(__file__))
 ow = openpyxl.load_workbook(OLD)
 oi, o2, om = ow['Inputs'], ow['Inputs (2)'], ow['Model']
-N = om.max_row - 358                                   # linhas do bloco de drivers (máscara antiga tem 358 linhas)
-while N > 0 and all(om.cell(18 + N - 1, c).value is None for c in range(1, 40)): N -= 1
+# linhas do bloco de drivers: deslocamento em que os rótulos do Model antigo voltam a bater com os da máscara (linha 18 em
+# diante). Contar pelo max_row engana quando há linhas vazias no fim, e o bloco copiado passa a apontar para a linha errada.
+_mk = openpyxl.load_workbook(NEWM)['Model']
+_lab = lambda ws, r: str(ws.cell(r, 3).value or '').strip()
+_ref = [r for r in range(18, 120) if _lab(_mk, r)][:25]
+N = next(k for k in range(0, 400) if all(_lab(om, r + k) == _lab(_mk, r) for r in _ref))
+# bloco de drivers abaixo do Model (ex.: Fleury, linhas 359+), sem linhas abertas na linha 18
+BLK = list(range(18, 18 + N)) if N else list(range(359, om.max_row + 1))
 
 # períodos
 PER_OLD = {}
@@ -144,6 +150,16 @@ code_row(50, 44, 'Net income reported (lucro líquido reportado) — base do che
 # códigos 45+ nas mesmas linhas da Inputs (2) antiga (o bloco do Model referencia essas linhas)
 drv = [(rr, o2.cell(rr, 2).value, o2.cell(rr, 3).value) for rr in range(51, o2.max_row + 1) if isinstance(o2.cell(rr, 2).value, int) and o2.cell(rr, 2).value >= 45]
 for rr, code, lab in drv: code_row(rr, code, lab)
+# códigos 44+: vazio (e não 0) quando nenhuma linha da Inputs com o código tem número no trimestre, como na máscara antiga.
+# Sem isso o segmento sem dado entra como 0, a soma dos segmentos fica parcial e o anual soma trimestres faltantes.
+for rr in [50] + [x[0] for x in drv]:
+    for c in range(4, 34):
+        f = n2.cell(rr, c).value
+        if isinstance(f, str) and f.startswith('=IF(') and 'SUMIFS(' in f and 'ISNUMBER' not in f:
+            m = re.match(r'=IF\((\w+\$3=0),"",(SUMIFS\(INDEX\((Inputs!\$D\$4:\$AG\$\d+),0,(MATCH\([^)]*\))\),(Inputs!\$B\$4:\$B\$\d+),(\$B\d+)\)/1000)\)$', f)
+            if m:
+                flag, sumifs, rng, match, crng, key = m.groups()
+                n2.cell(rr, c).value = (f'=IF({flag},"",IF(SUMPRODUCT(({crng}={key})*ISNUMBER(INDEX({rng},0,{match})))=0,"",{sumifs}))')
 for rr in range(51, o2.max_row + 1):          # títulos e notas do bloco antigo
     if not isinstance(o2.cell(rr, 2).value, int) and o2.cell(rr, 3).value: n2.cell(rr, 3).value = o2.cell(rr, 3).value
 # lucro reportado na linha 4 do Model (base do check de DRE)
@@ -155,12 +171,14 @@ for c in range(9, 36):
 nm['C4'] = 'Net Income reportado (lucro líquido) — base do check de DRE'
 
 # ------------------------------------------------------------------ bloco de drivers do Model (mesmas colunas e linhas)
-for rr in range(18, 18 + N):
+for rr in BLK:
     nm.row_dimensions[rr].height = om.row_dimensions[rr].height
     for c in range(1, min(om.max_column, nm.max_column) + 1):
         a, b = om.cell(rr, c), nm.cell(rr, c)
         b.value = a.value
-        if a.has_style: b._style = copy.copy(a._style)
+        if a.has_style:            # estilo entre pastas diferentes: copiar atributo a atributo (o _style é índice da pasta de origem)
+            b.font, b.fill, b.border = copy.copy(a.font), copy.copy(a.fill), copy.copy(a.border)
+            b.alignment, b.protection, b.number_format = copy.copy(a.alignment), copy.copy(a.protection), a.number_format
 
 # ------------------------------------------------------------------ correções da máscara (falhas herdadas da máscara original)
 SH = lambda r: r + N if r >= 18 else r
@@ -185,8 +203,8 @@ FIX.append(f'Model linhas {SH(228)} a {SH(231)}: IFERROR (dependem do preço da 
 # trimestres realizados 4T25, 1T26 e 2T26 (AF, AH, AI): a máscara deixou várias linhas sem a fórmula histórica (capex,
 # imobilizado, intangível, DSO/DIO/DPO...) ou com a fórmula de projeção. Repete o padrão do 3T25 (coluna AE).
 nfix = collections.Counter()
-for r in range(8, nm.max_row + 1):
-    if 18 <= r < 18 + N: continue
+for r in range(8, 359 + N):
+    if r in BLK: continue
     for cl, scl in (('AF', 'AE'), ('AH', 'AE'), ('AI', 'AE'), ('AG', 'AB')):
         src = nm[f'{scl}{r}']
         if not (isinstance(src.value, str) and src.value.startswith('=')): continue
@@ -215,8 +233,8 @@ FIX.append(f'Model linha {SH(189)} (dívida LP no cronograma): zeros digitados n
 # 1T21 e 2021 (colunas I e M): a grade começa no 1T21 e a coluna H (2020) está vazia, então tudo o que é variação de saldo
 # (capex, intangível, capital de giro, DFC indireta) sairia igual ao saldo inteiro. Fica vazio quando não há o saldo anterior.
 n_h = 0
-for r in range(8, nm.max_row + 1):
-    if 18 <= r < 18 + N: continue
+for r in range(8, 359 + N):
+    if r in BLK: continue
     for cl in ('I', 'M'):
         f = nm[f'{cl}{r}'].value
         if not (isinstance(f, str) and f.startswith('=')) or 'IFERROR' in f: continue
@@ -234,7 +252,7 @@ for c in range(CI('I'), CI('AI') + 1):
     nm[f'{cl}3']._style = copy.copy(nm['AH3']._style)
 FIX.append(f'Model linha 3 (check de DRE): fórmula estendida para 1T21-4T25 (lucro do Model, linha {ni_row}, contra o reportado, linha 4)')
 # linha 17 ("Check Receita"): vazia na máscara. Liga no check do bloco de drivers; sem check, receita (15) − linha de soma
-blk = [(r, str(nm.cell(r, 3).value or '').lower()) for r in range(18, 18 + N)]
+blk = [(r, str(nm.cell(r, 3).value or '').lower()) for r in BLK]
 chk = next((r for r, l in blk if 'check' in l), None)
 tot = next((r for r, l in blk if '(soma)' in l or l.startswith('receita total') or l.startswith('total')), None)
 for c in range(CI('I'), CI('AI') + 1):
