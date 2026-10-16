@@ -111,6 +111,7 @@ class Co:
 
     # ---------------- balanço de face: instância do próprio 10-Q/10-K, ordem do documento até o total do passivo + PL
     def face(self, p, override=None):
+        if override == 'skip': return None, None        # instância sem ordem de documento (ordem alfabética): balanço não confiável
         cands = [(a, f) for a, f in self.filings.items() if label(f['rd']) == p]
         if override:                                   # accn ou (accn, data): coluna comparativa de outro filing
             oa, od = override if isinstance(override, tuple) else (override, None)
@@ -130,7 +131,7 @@ class Co:
             lo = rows[0][0] if rows else lo
             plain = sorted(i for i, n, v in rows)
             for (n, ns, s, e, dd, v, u, aa, fl, i) in self.facts:
-                if aa == a and s is None and e == rd and len(dd) == 1 and u.endswith('USD') and lo < i < hi and 'VariableInterestEntity' not in dd[0][1]:
+                if aa == a and s is None and e == rd and len(dd) == 1 and u.endswith('USD') and lo < i < hi and 'VariableInterestEntity' not in dd[0][1] and not any(k in dd[0][0] for k in ('Segment', 'ConsolidationItems')) and n not in ('Assets', 'Liabilities', 'StockholdersEquity', 'LiabilitiesAndStockholdersEquity'):
                     # só se cair entre duas linhas de face consecutivas (distância curta)
                     if any(0 < i - j <= 8 for j in plain) and any(0 < j - i <= 8 for j in plain):
                         rows.append((i, f'{n}[{dd[0][1].split(":")[-1]}]', v))

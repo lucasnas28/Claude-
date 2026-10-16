@@ -30,6 +30,7 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 | Bunge | Bunge Limited (CIK 1144519) até 3T23 e Bunge Global (CIK 1996862) depois. Para rodar de novo, baixe os dois CIKs e junte `accns.txt` e `inst/` numa só pasta `dl`. A Viterra quebra a comparabilidade a partir do 3T25 |
 | Oracle | Ano fiscal fecha em maio; o 10-K etiqueta o 4T fiscal com o valor do ano (tratado no `sx.py`). Custo = cloud e software + hardware + serviços. Preferenciais série D no PL |
 | CoreWeave | IPO em mar/25: a série começa no 1T24 e o balanço no 4T24 |
+| CHS Inc. | Cooperativa agrícola (preferenciais CHSCP na Nasdaq). Ano fiscal fecha em agosto. Balanço de 1T20 e 2T20 vazio (instâncias em ordem alfabética); balanço de agosto vem do comparativo do 10-Q de novembro. Segmentos: Energy, Ag, Nitrogen e Corporate até FY25; Energy, Grains, Agronomy e demais a partir de 4T25 |
 
 ### Feitos (Brasil)
 
