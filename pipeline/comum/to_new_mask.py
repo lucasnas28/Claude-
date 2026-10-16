@@ -24,6 +24,7 @@ OLD, NEWM, OUT, CUR, LAST = sys.argv[1:6]
 LAST = dt.date.fromisoformat(LAST)
 HERE = os.path.dirname(os.path.abspath(__file__))
 ow = openpyxl.load_workbook(OLD)
+omv = openpyxl.load_workbook(OLD, data_only=True)['Model']
 oi, o2, om = ow['Inputs'], ow['Inputs (2)'], ow['Model']
 # linhas do bloco de drivers: deslocamento em que os rótulos do Model antigo voltam a bater com os da máscara (linha 18 em
 # diante). Contar pelo max_row engana quando há linhas vazias no fim, e o bloco copiado passa a apontar para a linha errada.
@@ -33,6 +34,7 @@ _ref = [r for r in range(18, 120) if _lab(_mk, r)][:25]
 N = next(k for k in range(0, 400) if all(_lab(om, r + k) == _lab(_mk, r) for r in _ref))
 # bloco de drivers abaixo do Model (ex.: Fleury, linhas 359+), sem linhas abertas na linha 18
 BLK = list(range(18, 18 + N)) if N else list(range(359, om.max_row + 1))
+N_OLD = N
 
 # períodos
 PER_OLD = {}
@@ -133,7 +135,10 @@ n2['A2'] = f'{cur_lbl} milhões'
 for p in PERS:
     y, q = 2000 + int(p[2:]), int(p[0])
     end = dt.date(y, 3 * q, [31, 30, 30, 31][q - 1])
-    n2.cell(3, PER_NEW[p]).value = 1 if end <= LAST else 0
+    # realizado = já fechou E o modelo de origem tem receita no trimestre. Vamos: DRE só desde o 1T23, então 2021-22 ficam
+    # fora (o balanço de 2021-22 sem DRE sairia com receita e custos 0, número inventado)
+    has_rev = isinstance(omv.cell(15, PER_NEW[p] + 5).value, (int, float))
+    n2.cell(3, PER_NEW[p]).value = 1 if end <= LAST and has_rev else 0
 for c in range(4, 34):
     if n2.cell(2, c).value is not None and not re.fullmatch(r'[1-4]Q\d\d', str(n2.cell(2, c).value)):
         qs = [n2.cell(3, c - k).value for k in range(1, 5)]
@@ -159,7 +164,8 @@ for rr in [50] + [x[0] for x in drv]:
             m = re.match(r'=IF\((\w+\$3=0),"",(SUMIFS\(INDEX\((Inputs!\$D\$4:\$AG\$\d+),0,(MATCH\([^)]*\))\),(Inputs!\$B\$4:\$B\$\d+),(\$B\d+)\)/1000)\)$', f)
             if m:
                 flag, sumifs, rng, match, crng, key = m.groups()
-                n2.cell(rr, c).value = (f'=IF({flag},"",IF(SUMPRODUCT(({crng}={key})*ISNUMBER(INDEX({rng},0,{match})))=0,"",{sumifs}))')
+                n2.cell(rr, c).value = (f'=IF(SUMPRODUCT(({crng}={key})*ISNUMBER(INDEX({rng},0,{match})))=0,"",{sumifs})')
+                # sem a flag: dado operacional e de segmento vale mesmo antes de haver demonstrações completas
 for rr in range(51, o2.max_row + 1):          # títulos e notas do bloco antigo
     if not isinstance(o2.cell(rr, 2).value, int) and o2.cell(rr, 3).value: n2.cell(rr, 3).value = o2.cell(rr, 3).value
 # lucro reportado na linha 4 do Model (base do check de DRE)
@@ -179,6 +185,13 @@ for rr in BLK:
         if a.has_style:            # estilo entre pastas diferentes: copiar atributo a atributo (o _style é índice da pasta de origem)
             b.font, b.fill, b.border = copy.copy(a.font), copy.copy(a.fill), copy.copy(a.border)
             b.alignment, b.protection, b.number_format = copy.copy(a.alignment), copy.copy(a.protection), a.number_format
+
+# bloco: valor da Inputs (2) que pode vir "" (trimestre/ano sem dado) usado em conta -> IFERROR na célula inteira
+for rr in BLK:
+    for c in range(1, nm.max_column + 1):
+        f = nm.cell(rr, c).value
+        if isinstance(f, str) and f.startswith('=') and not f.startswith('=IFERROR(') and re.search(r',""\)\s*[-+*/]', f):
+            nm.cell(rr, c).value = f'=IFERROR({f[1:]},"")'
 
 # ------------------------------------------------------------------ correções da máscara (falhas herdadas da máscara original)
 SH = lambda r: r + N if r >= 18 else r
@@ -266,9 +279,9 @@ FIX.append('Model H5: data de 31/12/2020 (base do DSO, DIO e DPO do 1T21)')
 vs = nw['Valuation']
 for row in vs.iter_rows():
     for x in row:
-        if isinstance(x.value, str) and x.value.startswith('=') and 'IFERROR' not in x.value and re.search(r'\*\(1\+', x.value):
+        if isinstance(x.value, str) and x.value.startswith('=') and not x.value.startswith('=IFERROR('):
             x.value = f'=IFERROR({x.value[1:]},"")'
-FIX.append('Valuation: IFERROR nas fórmulas de crescimento que dependem de premissa vazia')
+FIX.append('Valuation: IFERROR nas fórmulas (dependem de premissas vazias no modo histórico)')
 
 # ------------------------------------------------------------------ Control e rótulos de moeda
 name = oi['D1'].value or ''
