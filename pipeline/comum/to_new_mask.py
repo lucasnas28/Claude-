@@ -296,7 +296,35 @@ for c in range(CI('I'), CI('AI') + 1):         # realizados que comparam com col
         if (isinstance(f, str) and f.startswith('=') and not f.startswith('=IFERROR(')
                 and any(x in offL for x in re.findall(r"(?<![A-Z$!'])\$?([A-Z]{1,2})\$?\d+", f))):
             nm.cell(r, c).value = f'=IFERROR({f[1:]},"")'; n_ref += 1
+# e o que depende dessas células com conta direta (ex.: DFC = −capex): também IFERROR, até estabilizar
+if off:
+    W = {(r, c) for c in range(CI('I'), CI('AI') + 1) if c not in off for r in range(8, 359 + N)
+         if r not in BLK and isinstance(nm.cell(r, c).value, str) and nm.cell(r, c).value.startswith('=IFERROR(')}
+    first = min(c for c in range(CI('I'), CI('AI') + 1) if c not in off)
+    cols = [first] + [c for c in range(first + 1, CI('AI') + 1) if (c - 9) % 5 == 4]   # 1º realizado e anuais
+    changed = True
+    while changed:
+        changed = False
+        for c in cols:
+            for r in range(8, 359 + N):
+                f = nm.cell(r, c).value
+                if r in BLK or not (isinstance(f, str) and f.startswith('=')) or f.startswith('=IFERROR('): continue
+                refs = {(int(rw), CI(cl)) for cl, rw in re.findall(r"(?<![A-Z$!'])\$?([A-Z]{1,2})\$?(\d+)", f)}
+                m = re.fullmatch(r'=SUM\(([A-Z]{1,2})(\d+):([A-Z]{1,2})(\d+)\)', f)
+                if m and (c - 9) % 5 == 4 and any((r, x) in W for x in range(CI(m.group(1)), CI(m.group(3)) + 1)):
+                    # anual com trimestre vazio: vazio, e não a soma parcial
+                    nm.cell(r, c).value = f'=IF(COUNT({f[5:-1]})<4,"",{f[1:]})'; W.add((r, c)); changed = True; n_ref += 1
+                elif refs & W:
+                    nm.cell(r, c).value = f'=IFERROR({f[1:]},"")'; W.add((r, c)); changed = True; n_ref += 1
 if off: FIX.append(f'Model: {len(off)} colunas históricas sem demonstrações na fonte ficam vazias; {n_ref} fórmulas que comparam com elas com IFERROR')
+# DFC indireta no 1º trimestre realizado (e no anual daquele ano): sem o balanço anterior ela sai parcial (só lucro e D&A,
+# variação de caixa = saldo inteiro). Fica vazia; a DFC começa no 2º trimestre com balanço.
+fq = min(c for c in range(CI('I'), CI('AI') + 1) if (c - 9) % 5 != 4 and n2.cell(3, c - 5).value == 1)
+fa = next(c for c in range(fq, CI('AI') + 1) if (c - 9) % 5 == 4)
+for c in [fq, fa] + off:
+    for r in range(SH(243), SH(281)):
+        if nm.cell(r, c).value is not None: nm.cell(r, c).value = None
+FIX.append(f'Model DFC ({L(fq)} e {L(fa)}): 1º trimestre com balanço e o anual daquele ano ficam vazios (sem balanço anterior)')
 nm['H5'] = dt.datetime(2020, 12, 31); nm['H5'].number_format = nm['I5'].number_format
 FIX.append('Model H5: data de 31/12/2020 (base do DSO, DIO e DPO do 1T21)')
 vs = nw['Valuation']
