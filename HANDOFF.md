@@ -57,6 +57,14 @@ Situação em 16/10/2026. Use este documento para retomar o trabalho em outra fe
 
 A lista completa do pedido está na aba "Planilha2" do arquivo `BALANCOS PARA FAZER - COMPLETO.xlsx`, que fica com o usuário.
 
+## Máscara vigente: o que mudou nos números
+
+- A grade começa no 1T21; 2020 saiu. A DFC indireta do 1T21 (e de 2021 no anual) fica vazia por falta do balanço de 2020.
+- Vamos: a fonte só tem DRE desde o 1T23, então 2021-22 ficam fora (o balanço desses anos existia no modelo antigo, sem DRE). A DFC começa no 2T23.
+- Dívida LP e caixa disponível do cronograma em 1T26/2T26 usam o saldo real do balanço (o modelo antigo repetia o 4T25).
+- Diferenças receita x soma dos segmentos que vêm da fonte (já existiam): AMD 4T21/4T22, GE Aerospace (cisões), Bunge até US$ 80 mi em 2024-25, MercadoLibre US$ 622 mi no 4T23, Netflix até US$ 46 mi, Oracle/Uber/Eli Lilly até US$ 8 mi (arredondamento).
+- Conferência: `pipeline/comum/check_modelo.py` (checks e erros) e `pipeline/comum/dupla_checagem.py ORIGEM CONVERTIDO` (receita, caixa, checks e plug da DFC por trimestre).
+
 ## Bugs já corrigidos (não reintroduzir)
 
 1. **Painel congelado do Model na linha ~350:** a planilha não rolava. Causa: o `shift_rows.py` deslocava o `topLeftCell`. Corrigido no script e nos 43 arquivos.
